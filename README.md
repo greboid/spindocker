@@ -4,12 +4,19 @@ A Docker engine for [Spindle](https://tangled.sh) CI that uses standard containe
 
 ## Quick start
 
+Clone the core repo and copy the engine files and custom entry point into it:
+
 ```bash
 git clone https://tangled.org/tangled.org/core.git
 cd core
-git apply /path/to/add-docker-engine.patch
+
+cp -r /path/to/spindle-docker-engine/engines/docker spindle/engines/docker
+cp /path/to/spindle-docker-engine/cmd/spindle/main.go cmd/spindle/main.go
+
 go build -o spindle ./cmd/spindle/
 ```
+
+The custom `cmd/spindle/main.go` registers both the docker and nixery engines. No patching needed.
 
 ## Configuration
 
@@ -58,3 +65,17 @@ The docker engine implements the same `models.Engine` interface as the nixery en
 - No Nix setup step or nix profile installs
 - Uses `sh -c` instead of `bash -c` for broader base image compatibility
 - Both engines can coexist — set `engine: docker` or `engine: nixery` per workflow
+
+## Updating upstream
+
+To pull in upstream changes:
+
+```bash
+cd core
+git pull
+# Re-copy the custom entry point if it was overwritten
+cp /path/to/spindle-docker-engine/cmd/spindle/main.go cmd/spindle/main.go
+go build -o spindle ./cmd/spindle/
+```
+
+The docker engine code doesn't modify any upstream files, so merges should be clean. The only file that differs from upstream is `cmd/spindle/main.go`.
